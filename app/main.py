@@ -4,9 +4,9 @@ import sys
 
 from openai import OpenAI
 
-API_KEY = os.getenv("OPENROUTER_API_KEY")
+# API_KEY = os.getenv("OPENROUTER_API_KEY")
 BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
-
+API_KEY="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"
 
 def main():
     p = argparse.ArgumentParser()
@@ -21,6 +21,25 @@ def main():
     chat = client.chat.completions.create(
         model="anthropic/claude-haiku-4.5",
         messages=[{"role": "user", "content": args.p}],
+        tools=[
+            {
+                "type": "function",
+                "function": {
+                    "name": "Read",
+                    "description": "Read and return the contents of a file",
+                    "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "file_path": {
+                        "type": "string",
+                        "description": "The path to the file to read"
+                        }
+                    },
+                    "required": ["file_path"]
+                    }
+                }
+            }
+        ]
     )
 
     if not chat.choices or len(chat.choices) == 0:
