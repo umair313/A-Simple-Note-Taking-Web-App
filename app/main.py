@@ -40,6 +40,27 @@ def main():
                         "required": ["file_path"]
                         }
                     }
+                },
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "Write",
+                        "description": "Write Content to a file",
+                        "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "file_path": {
+                            "type": "string",
+                            "description": "The path to the file to write"
+                            },
+                            "content": {
+                            "type": "string",
+                            "description": "content to write in a file"
+                            }
+                        },
+                        "required": ["file_path", "content"]
+                        }
+                    }
                 }
             ]
         )
@@ -61,6 +82,19 @@ def main():
                         "content": content
                     }
                     messages.append(result)
+            elif tool_call.function.name == "Write":
+                args = json.loads(tool_call.function.arguments)
+                file_path = args["file_path"]
+                content = args["content"]
+                os.makedirs(os.path.dirname(file_path), exist_ok=True) if os.path.dirname(file_path) else None
+                with open(file_path, "w") as f:
+                    f.write(content)
+                result = {
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": f"Successfully wrote to {file_path}"
+                }
+                messages.append(result)
         else:
             print(message.content)
             break
