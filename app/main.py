@@ -17,7 +17,8 @@ def main():
         raise RuntimeError("OPENROUTER_API_KEY is not set")
     messages = [{"role": "user", "content": args.p}]
     client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
-
+    # You can use print statements as follows for debugging, they'll be visible when running tests.
+    print("Logs from your program will appear here!", file=sys.stderr)
     while True:
         chat = client.chat.completions.create(
             model="anthropic/claude-haiku-4.5",
@@ -46,10 +47,6 @@ def main():
         if not chat.choices or len(chat.choices) == 0:
             raise RuntimeError("no choices in response")
 
-        
-        # You can use print statements as follows for debugging, they'll be visible when running tests.
-        print("Logs from your program will appear here!", file=sys.stderr)
-
         message = chat.choices[0].message
         messages.append(message)
         if message.tool_calls:
@@ -65,9 +62,7 @@ def main():
                         "content": content
                     }
                     messages.append(result)
-                    # print(content, end='')
         else:
-            print("AI Response")
             print(message.content)
             break
 
