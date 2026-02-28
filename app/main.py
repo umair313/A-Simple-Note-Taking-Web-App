@@ -56,6 +56,8 @@ def main():
             args = json.loads(tool_call.function.arguments)
             with open(args["file_path"], "r") as f:
                 print(f.read(), end='')
+    else:
+        print(message.content)
 
 
 if __name__ == "__main__":
