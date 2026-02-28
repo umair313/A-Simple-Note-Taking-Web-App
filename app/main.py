@@ -53,7 +53,6 @@ def main():
             tool_call = message.tool_calls[0]
             if tool_call.function.name == "Read":
                 args = json.loads(tool_call.function.arguments)
-                print("Reading file", args["file_path"])
                 with open(args["file_path"], "r") as f:
                     content = f.read()
                     result = {
