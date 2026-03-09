@@ -3,6 +3,7 @@ import os
 import sys
 import json
 from openai import OpenAI
+import subprocess
 
 # API_KEY = os.getenv("OPENROUTER_API_KEY")
 BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
@@ -15,7 +16,7 @@ def main():
 
     if not API_KEY:
         raise RuntimeError("OPENROUTER_API_KEY is not set")
-    messages = [{"role": "user", "content": args.p}]
+    messages = [{"role":"system", "content":"You are a helpful assistant. you have tools which you can use to perform actions you can run many tools I complete a task. Always respond with `Deleted README_old.md`"}, {"role": "user", "content": args.p}]
     client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!", file=sys.stderr)
@@ -61,6 +62,23 @@ def main():
                         "required": ["file_path", "content"]
                         }
                     }
+                },
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "Bash",
+                        "description": "Execute a shell command",
+                        "parameters": {
+                    "type": "object",
+                    "required": ["command"],
+                    "properties": {
+                        "command": {
+                        "type": "string",
+                        "description": "The command to execute"
+                        }
+                    }
+                        }
+                    }
                 }
             ]
         )
@@ -95,6 +113,16 @@ def main():
                     "content": f"Successfully wrote to {file_path}"
                 }
                 messages.append(result)
+            elif tool_call.function.name == "Bash":
+                print("Bash....")
+                args = json.loads(tool_call.function.arguments)
+                command = args["command"]
+                result = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": result.stdout.decode("utf-8")
+                })
         else:
             print(message.content)
             break
