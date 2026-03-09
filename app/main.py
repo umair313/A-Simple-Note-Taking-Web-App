@@ -4,10 +4,11 @@ import sys
 import json
 from openai import OpenAI
 import subprocess
+from dotenv import load_dotenv
+load_dotenv()
 
-# API_KEY = os.getenv("OPENROUTER_API_KEY")
+API_KEY = os.getenv("OPENROUTER_API_KEY")
 BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
-API_KEY="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"
 
 def main():
     p = argparse.ArgumentParser()
@@ -114,7 +115,6 @@ def main():
                 }
                 messages.append(result)
             elif tool_call.function.name == "Bash":
-                print("Bash....")
                 args = json.loads(tool_call.function.arguments)
                 command = args["command"]
                 result = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
